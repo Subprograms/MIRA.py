@@ -11,3 +11,6 @@ Stealthy startup script that monitors network traffic, keystrokes, and screen sn
 3. Upon every renaming of the script's filename, its corresponding Value in the Run key is updated to reflect this change, specifically its Data field.
 4. Upon every execution (and startup of the system), the script will exfiltrate keystrokes, screenshots of the screen, and network activity of the victim machine, to be transmitted to the specified TARGET_IP. This follows the specified time interval for each exfiltration activity as well.
 5. Upon the deletion of the script's corresponding Value in the Run key, the script will attempt to restore it.
+
+## Notes
+- The pertinent files regarding the exfiltrated activities can be found in the specified directory of the TARGET_IP, specifically in the folders: keylogs, packets, and screenshots.
