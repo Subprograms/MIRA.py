@@ -13,9 +13,9 @@ import io
 
 TARGET_IP = "127.0.0.1"
 TARGET_PORT = 4444
-KEYLOG_DIR = r"C:\Users\<User>\Desktop"
-SCREENSHOT_DIR = r"C:\Users\<User>\Desktop"
-PACKETS_DIR = r"C:\Users\<User>\Desktop"
+KEYLOG_DIR = r"C:\Users\<User>\Downloads"
+SCREENSHOT_DIR = r"C:\Users\<User>\Downloads"
+PACKETS_DIR = r"C:\Users\<User>\Downloads"
 KEYLOG_INTERVAL = 10
 SCREENSHOT_INTERVAL = 60
 NETWORK_SNIFFER_TIMEOUT = 60
