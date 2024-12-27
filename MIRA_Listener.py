@@ -11,17 +11,14 @@ def start_listener():
         server.listen(5)
         while True:
             client, addr = server.accept()
-            handle_client(client)
-
-def handle_client(client):
-    data = b""
-    while True:
-        chunk = client.recv(4096)
-        if not chunk:
-            break
-        data += chunk
-    process_data(data)
-    client.close()
+            data = b""
+            while True:
+                chunk = client.recv(4096)
+                if not chunk:
+                    break
+                data += chunk
+            process_data(data)
+            client.close()
 
 def process_data(data):
     lines = data.split(b"\n", 1)
