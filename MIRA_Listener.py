@@ -2,9 +2,9 @@ import socket
 import os
 import time
 
-KEYLOG_DIR = r"C:\Users\Target\Desktop\keylogs"
-SCREENSHOT_DIR = r"C:\Users\Target\Desktop\screenshots"
-PACKETS_DIR = r"C:\Users\Target\Desktop\packets"
+KEYLOG_DIR = r"C:\Users\<User>\Desktop\keylogs"
+SCREENSHOT_DIR = r"C:\Users\<User>\Desktop\screenshots"
+PACKETS_DIR = r"C:\Users\<User>\Desktop\packets"
 HOST = "127.0.0.1"
 PORT = 4444
 
