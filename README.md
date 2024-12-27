@@ -2,7 +2,7 @@
 Stealthy startup script that monitors network traffic, keystrokes, and screen snapshots of a victim machine from a remote machine. This shall be used to ethically simulate persistence, defense evasion, and exfiltration techniques.
 
 ## Setup (MIRA.py)
-- Foremost, change the value of TARGET_IP in the script to the intended IP address where the keylogs, screenshots, and network activity of the victim machine are to be transmitted.
+- Foremost, change the value of TARGET_IP in the script to the intended IP address where the keylogs, screenshots, and network activity of the victim machine are to be transmitted. By default, this is set to 0.0.0.0.
 - Foremost, ensure that the victim machine and TARGET_IP machine can reach each other (i.e. in the same network).
 - Optionally, you may change the time intervals for each activity exfiltration (for keylogging, this interval specifies the duration before a new line of log is created in the generated log file of the keystrokes).
 
