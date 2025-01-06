@@ -1,5 +1,5 @@
 # MIRA.py: Monitoring Invisible Remote Activity - A Stealthy Startup Script for Activity Exfiltration
-Stealthy startup script that monitors network traffic, keystrokes, and screen snapshots of a victim machine from a remote machine. This shall be used to ethically simulate persistence, defense evasion, and exfiltration techniques.
+Stealthy startup script that monitors network traffic, keystrokes, and screen snapshots of a victim machine from a remote machine. This shall be used to ethically simulate persistence, defense evasion, and collection techniques.
 
 ## Setup (MIRA.py)
 - Foremost, change the value of TARGET_IP in the script to the intended IP address where the keylogs, screenshots, and network activity of the victim machine are to be transmitted. By default, this is set to 127.0.0.1.
